@@ -1,0 +1,76 @@
+name: kipoi-dev
+channels:
+  - bioconda
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.6
+  # general packages
+  # - git-lfs 
+  # General
+  - numpy>=1.13.0
+  - pandas
+  - pytest>=3.3.1
+  - pytest-xdist
+  - pytest-sugar
+  - pytest-cov>=2.6.1
+  - deprecation>=2.0.6
+  - tabix
+  - keras==2.1.6
+  - cython
+  - ls-gkm=0.0.1
+  - maxentpy
+  - tqdm
+  - joblib
+  - pyaml 
+  - zlib # in the case we need to build cyvcf2 by ourselfs in the pipo steo we need zlib to link
+  #- coveralls
+  - h5py>=2.7.0
+  - scipy>=1.0.0
+  - attrs>=18.2.0
+  - matplotlib
+  - tinydb>=3.12.2
+  # Bio
+  - pybigwig>=0.3.10
+  - intervaltree 
+  - deepdish 
+  - htslib 
+  # could not pin pydedtools ins conda
+  - pybedtools>=0.7.10
+  - pyvcf>=0.6.8
+  - samtools 
+  - pysam>=0.14.0
+  - pyfaidx>=0.5.5.2
+  - cyvcf2>=0.9.0 # (mmsplice)
+  - gffutils 
+  - click
+  - bedtools>=2.27.1
+  - htslib>=1.7
+  - genomelake>=0.1.4
+  # ML
+  - scikit-learn>=0.19.1
+  - tensorflow-gpu>=1.4.0
+  - pytorch
+  - torchvision
+  - cudatoolkit=9.0
+  - keras>=2.1.6
+  # for plugins (double check)
+  - fastparquet
+  - zarr 
+  - numcodecs
+  # singularity
+  - singularity
+  # gitlsd
+  - git-lfs
+  # jupyer
+  - jupyter
+  - gtfparse>=1.0.7
+  - pip:
+    #- mmsplice -< this makes trouble (the deps of mmsplice), therefore we install all dependencies here  and later install mmsplice wihtout any dependency
+    - sklearn-pandas
+    - kipoi>=0.6.9
+    - kipoi_interpret>=0.1.2
+    - kipoi_veff>=0.2.3
+    - kipoiseq>=0.2.3
+    - concise>=0.6.5
