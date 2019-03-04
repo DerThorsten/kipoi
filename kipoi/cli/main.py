@@ -198,6 +198,10 @@ def cli_predict(command, raw_args):
                         help="Run `kipoi predict` in the appropriate singularity container. "
                         "Containters will get downloaded to ~/.kipoi/envs/ or to "
                         "$SINGULARITY_CACHEDIR if set")
+    parser.add_argument("--docker", action='store_true',
+                        help="Run `kipoi predict` in the appropriate docker container. "
+                        "Containters will get downloaded to ~/.kipoi/envs/ or to "
+                        "$DOCKER_CACHEDIR if set (WARNIGN, THIS IS A WORK IN PROGRESS")
     parser.add_argument('-o', '--output', required=True, nargs="+",
                         help="Output files. File format is inferred from the file path ending. Available file formats are: " +
                         ", ".join(["." + k for k in writers.FILE_SUFFIX_MAP]))
@@ -216,8 +220,11 @@ def cli_predict(command, raw_args):
             sys.exit(1)
         dir_exists(os.path.dirname(o), logger)
 
+    if  args.singularity and  args.docker:
+        parser.error("'--singularity' and '--docker' cannot be used together")
+
     # singularity_command
-    if args.singularity:
+    elif args.singularity:
         from kipoi.cli.singularity import singularity_command
         logger.info("Running kipoi predict in the singularity container")
         # Drop the singularity flag
@@ -227,6 +234,18 @@ def cli_predict(command, raw_args):
                             dataloader_kwargs,
                             output_files=args.output,
                             source=args.source,
+                            dry_run=False)
+        return None
+    elif args.docker:
+        from kipoi.cli.containerization import docker_command
+        logger.info("Running kipoi predict in a docker container")
+        # Drop the singularity flag
+        raw_args = [x for x in raw_args if x != '--docker']
+        docker_command(['kipoi', command] + raw_args,
+                            args.model,
+                            dataloader_kwargs,
+                            output_files=args.output,
+                            #source=args.source,
                             dry_run=False)
         return None
     # --------------------------------------------
