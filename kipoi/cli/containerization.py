@@ -17,9 +17,12 @@ from __future__ import print_function
 
 import six
 import os
+import os.path
 from kipoi_utils.utils import unique_list, makedir_exist_ok, is_subdir
 from kipoi_conda import _call_command
+from kipoi.config import _kipoi_dir
 import subprocess
+import tempfile
 import logging
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -124,13 +127,32 @@ def docker_run(container_name, command, bind_directories=[], gpu=False, dry_run=
     """
     
     options = []
-    if bind_directories:
-        options.append('--mount')
-        for d in bind_directories:
-            options.append('type=bind,source="%s,target="%s"'
-                %(d,d))
+    # options.append('--mount')
+    # marg = 'type=bind,source=/home/ciclon/example/intervals_file,target=/foo/intervals_file'
+    # options.append(marg)
 
-    cmd = ['docker', 'run'] + options + [container_name] + command
+    # options.append('--mount')
+    # marg = 'type=bind,source=/tmp/,target=/tmp/'
+    # options.append(marg)
+
+    for bdir in bind_directories:
+        options.append('--mount')
+        options.append('type=bind,source={0},target={0}'.format(bdir))
+    
+    #from kipoi.config import _kipoi_dir
+    logger.info(_kipoi_dir)
+    #mapping = "%s/:/root/.kipoi/"%_kipoi_dir
+    #mapping = "/tmp/:/tmp/"
+    #logger.info(mapping)
+    #options.append("-v")
+    #options.append(mapping)
+    #options.append()
+    #options.extend(['--tmpfs','/tmp'])
+    options.extend(['--user','1000:1000'])
+    #options.extend(['--entrypoint','/root'])
+    #options.append('--privileged ')
+
+    cmd = ['docker', 'run'] + options + [container_name ] +command
     logger.info(" ".join(cmd))
     if dry_run:
         return print(" ".join(cmd))
@@ -167,9 +189,15 @@ def container_local_path(remote_path):
 # ---------------------------------
 
 
-def involved_directories(dataloader_kwargs, output_files=[], exclude_dirs=[]):
+def involved_directories(dataloader_kwargs, output_files=None, exclude_dirs=None):
     """Infer the involved directories given dataloader kwargs
     """
+    if output_files is None:
+        output_files = []
+
+    if exclude_dirs is None:
+        exclude_dirs = []
+
     dirs = []
     # dataloader kwargs
     for k, v in six.iteritems(dataloader_kwargs):
@@ -258,8 +286,15 @@ def docker_command(kipoi_cmd, model, dataloader_kwargs, output_files=[], dry_run
     # remove all spaces within each command
     kipoi_cmd = [x.replace(" ", "").replace("\n", "").replace("\t", "") for x in kipoi_cmd]
 
+    logger.info(dataloader_kwargs)
+    dirs = involved_directories(dataloader_kwargs, output_files, exclude_dirs=[])
+    logger.info(dirs)
 
-    dirs = involved_directories(dataloader_kwargs, output_files, exclude_dirs=['/tmp', '~'])
+    # add home and tmp dir
+    home_dir = os.path.expanduser('~')
+    tmp_dir = tempfile.gettempdir()
+
+    dirs = unique_list(dirs + [home_dir, tmp_dir])
 
     docker_run(container_name='kipoi_cpu_docker',
                command=kipoi_cmd,

@@ -241,10 +241,24 @@ def cli_predict(command, raw_args):
         logger.info("Running kipoi predict in a docker container")
         # Drop the singularity flag
         raw_args = [x for x in raw_args if x != '--docker']
+
+        # make absolute path
+        working_dir = os.getcwd()
+        def make_abs(f):
+            f = os.path.abspath(f)
+            f = os.path.expanduser(f)
+            return f
+
+        # make absolute 
+        for key in dataloader_kwargs.keys():
+            dataloader_kwargs[key] = make_abs(dataloader_kwargs[key])
+
+        output_file = [make_abs(f) for f in args.output]
+
         docker_command(['kipoi', command] + raw_args,
                             args.model,
                             dataloader_kwargs,
-                            output_files=args.output,
+                            output_files=output_file,
                             #source=args.source,
                             dry_run=False)
         return None
