@@ -148,7 +148,7 @@ def docker_run(container_name, command, bind_directories=[], gpu=False, dry_run=
     #options.append(mapping)
     #options.append()
     #options.extend(['--tmpfs','/tmp'])
-    options.extend(['--user','1000:1000'])
+    #options.extend(['--user','1000:1000'])
     options.extend(['--env',"KIPOI_HOST_DIR='{0}'".format(_kipoi_dir)])
     
     #options.append('--privileged ')
