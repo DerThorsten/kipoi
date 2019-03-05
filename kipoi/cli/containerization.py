@@ -127,28 +127,12 @@ def docker_run(container_name, command, bind_directories=[], gpu=False, dry_run=
     """
     
     options = []
-    # options.append('--mount')
-    # marg = 'type=bind,source=/home/ciclon/example/intervals_file,target=/foo/intervals_file'
-    # options.append(marg)
-
-    # options.append('--mount')
-    # marg = 'type=bind,source=/tmp/,target=/tmp/'
-    # options.append(marg)
 
     for bdir in bind_directories:
         options.append('--mount')
         options.append('type=bind,source={0},target={0}'.format(bdir))
     
-    #from kipoi.config import _kipoi_dir
-    logger.info(_kipoi_dir)
-    #mapping = "%s/:/root/.kipoi/"%_kipoi_dir
-    #mapping = "/tmp/:/tmp/"
-    #logger.info(mapping)
-    #options.append("-v")
-    #options.append(mapping)
-    #options.append()
-    #options.extend(['--tmpfs','/tmp'])
-    # options.extend(['--user','1000:1000'])
+
     options.extend(['--env',"KIPOI_HOST_DIR={0}".format(_kipoi_dir)])
     options.extend(['-e',"USER=$USER"])
     options.extend(['-e',"USERID=$UID"])

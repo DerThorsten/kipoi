@@ -247,9 +247,6 @@ def cli_predict(command, raw_args):
         # Drop the singularity flag
         raw_args = [x for x in raw_args if x != '--docker']
 
-        for a in raw_args:
-            print("RAW",raw_args)
-
         # make absolute path
         working_dir = os.getcwd()
         def make_abs(f, raw_args):
