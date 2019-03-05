@@ -247,18 +247,26 @@ def cli_predict(command, raw_args):
         # Drop the singularity flag
         raw_args = [x for x in raw_args if x != '--docker']
 
+        for a in raw_args:
+            print("RAW",raw_args)
+
         # make absolute path
         working_dir = os.getcwd()
-        def make_abs(f):
-            f = os.path.abspath(f)
-            f = os.path.expanduser(f)
-            return f
+        def make_abs(f, raw_args):
+            absf = os.path.abspath(os.path.join(working_dir, f))
+            absf = os.path.expanduser(absf)
+
+            for i,a in enumerate(raw_args):
+                raw_args[i] = a.replace(f, absf)
+
+
+            return absf
 
         # make absolute 
         for key in dataloader_kwargs.keys():
-            dataloader_kwargs[key] = make_abs(dataloader_kwargs[key])
+            dataloader_kwargs[key] = make_abs(dataloader_kwargs[key], raw_args)
 
-        output_file = [make_abs(f) for f in args.output]
+        output_file = [make_abs(f, raw_args) for f in args.output]
 
         docker_command(['kipoi', command] + raw_args,
                             args.model,

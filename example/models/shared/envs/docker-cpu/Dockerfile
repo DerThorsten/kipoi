@@ -35,5 +35,7 @@ ENV PATH /opt/conda/envs/kipoi-dev/bin:$PATH
 RUN pip install mmsplice --no-deps 
 
 
-RUN git clone https://github.com/DerThorsten/kipoi -b docker kipoi
+
+RUN git clone https://github.com/DerThorsten/kipoi -b    docker kipoi
+
 RUN cd kipoi && pip install --force-reinstall --no-deps -e . && cd ..

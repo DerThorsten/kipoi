@@ -148,9 +148,11 @@ def docker_run(container_name, command, bind_directories=[], gpu=False, dry_run=
     #options.append(mapping)
     #options.append()
     #options.extend(['--tmpfs','/tmp'])
-    #options.extend(['--user','1000:1000'])
-    options.extend(['--env',"KIPOI_HOST_DIR='{0}'".format(_kipoi_dir)])
-    
+    # options.extend(['--user','1000:1000'])
+    options.extend(['--env',"KIPOI_HOST_DIR={0}".format(_kipoi_dir)])
+    options.extend(['-e',"USER=$USER"])
+    options.extend(['-e',"USERID=$UID"])
+
     #options.append('--privileged ')
 
     cmd = ['docker', 'run'] + options + [container_name ] +command
@@ -159,7 +161,7 @@ def docker_run(container_name, command, bind_directories=[], gpu=False, dry_run=
         return print(" ".join(cmd))
     else:
         returncode = subprocess.call(cmd,stdin=subprocess.PIPE)
-        #print("returncode",returncode.stdout)
+        #p #rint("returncode",returncode.stdout)
     if returncode != 0:
         raise ValueError("Command: {} failed".format(" ".join(cmd)))
 
@@ -294,8 +296,11 @@ def docker_command(kipoi_cmd, model, dataloader_kwargs, output_files=[], dry_run
     # add home and tmp dir
     home_dir = os.path.expanduser('~')
     tmp_dir = tempfile.gettempdir()
+    pw = "/etc/passwd"
 
-    dirs = unique_list(dirs + [home_dir, tmp_dir, _kipoi_dir])
+
+    extra = [home_dir, tmp_dir, _kipoi_dir, "/etc/passwd", "/etc/group", "/etc/shadow"]
+    dirs = unique_list(dirs + extra)
 
     docker_run(container_name='kipoi_cpu_docker',
                command=kipoi_cmd,
