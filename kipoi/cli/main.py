@@ -177,10 +177,15 @@ def cli_preproc(command, raw_args):
     logger.info("Done!")
 
 
+
+
 def cli_predict(command, raw_args):
+    print("CLI PREDICT")
     """CLI interface to predict
     """
     assert command == "predict"
+    _kipoi_dir = os.environ.get('KIPOI_HOST_DIR')
+
     parser = argparse.ArgumentParser('kipoi {}'.format(command),
                                      description='Run the model prediction.')
     add_model(parser)

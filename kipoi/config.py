@@ -18,14 +18,14 @@ logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 # --------------------------------------------
 
+_kipoi_dir = os.environ.get('KIPOI_HOST_DIR')
+if _kipoi_dir is None:
+    _kipoi_base_dir = os.path.expanduser('~')
+    if not os.access(_kipoi_base_dir, os.W_OK):
+        _kipoi_base_dir = '/tmp'
 
-_kipoi_base_dir = os.path.expanduser('~')
-if not os.access(_kipoi_base_dir, os.W_OK):
-    _kipoi_base_dir = '/tmp'
+    _kipoi_dir = os.path.join(_kipoi_base_dir, '.kipoi')
 
-_kipoi_dir = os.path.join(_kipoi_base_dir, '.kipoi')
-
-# model source container
 _MODEL_SOURCES = {}
 
 
