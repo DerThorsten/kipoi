@@ -1,4 +1,4 @@
-FROM docker/cuda:9.0-base-ubuntu16.04
+FROM nvidia/cuda:9.0-base-ubuntu16.04
 # based on https://github.com/Paperspace/fastai-docker/tree/master/fastai-v3
 ENV LANG C.UTF-8
 LABEL com.nvidia.volumes.needed="nvidia_driver"
