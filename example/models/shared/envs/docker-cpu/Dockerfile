@@ -1,4 +1,4 @@
-FROM FROM ubuntu:16.04
+FROM  ubuntu:16.04
 # based on https://github.com/Paperspace/fastai-docker/tree/master/fastai-v3
 ENV LANG C.UTF-8
 
