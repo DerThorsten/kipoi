@@ -34,4 +34,4 @@ RUN pip install mmsplice --no-deps
 
 # hotfixes
 RUN git clone https://github.com/DerThorsten/kipoi -b    docker kipoi
-RUN cd kipoi && pip install --force-reinstall --no-deps -e . && cd ..
+RUN cd kipoi && pip install --force-reinstall --no-deps -e . && cd 

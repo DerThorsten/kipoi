@@ -25,7 +25,7 @@ RUN curl -o ~/miniconda.sh -O  https://repo.continuum.io/miniconda/Miniconda3-la
 ENV PATH=$PATH:/opt/conda/bin/
 
 # Create Enviroment
-COPY enviroment.yaml /enviroment.yaml
+COPY example/models/shared/envs/docker-cpu/enviroment.yaml /enviroment.yaml
 RUN conda env create -f enviroment.yaml
 RUN echo "source activate kipoi-dev" > ~/.bash
 ENV PATH /opt/conda/envs/kipoi-dev/bin:$PATH
@@ -35,7 +35,6 @@ ENV PATH /opt/conda/envs/kipoi-dev/bin:$PATH
 RUN pip install mmsplice --no-deps 
 
 
-
+# hotfixes
 RUN git clone https://github.com/DerThorsten/kipoi -b    docker kipoi
-
 RUN cd kipoi && pip install --force-reinstall --no-deps -e . && cd ..
