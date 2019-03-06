@@ -24,7 +24,7 @@ RUN curl -o ~/miniconda.sh -O  https://repo.continuum.io/miniconda/Miniconda3-la
 ENV PATH=$PATH:/opt/conda/bin/
 
 # Create Enviroment
-COPY example/models/shared/envs/docker-cpu/enviroment.yaml /enviroment.yaml
+COPY enviroment.yaml /enviroment.yaml
 RUN conda env create -f enviroment.yaml
 RUN echo "source activate kipoi-dev" > ~/.bash
 ENV PATH /opt/conda/envs/kipoi-dev/bin:$PATH
