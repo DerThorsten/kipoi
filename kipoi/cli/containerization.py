@@ -141,20 +141,25 @@ def docker_run(user, repo, tag, command, bind_directories=[], gpu=False, dry_run
     
     options = []
     container_name = '{0}/{1}:{2}'.format(user, repo, tag)
+    #container_name = 'docker_img'
     for bdir in bind_directories:
         options.append('--mount')
         options.append('type=bind,source={0},target={0}'.format(bdir))
 
     for special_dir in ["/etc/passwd", "/etc/group", "/etc/shadow"]:
         options.append('--mount')
-        options.append('type=bind,source={0},target={0},readonly'.format(special_dir))
+        options.append('type=bind,source={0},target={0}'.format(special_dir))
     
     if gpu:
         options.append("--runtime=nvidia")
 
-    options.extend(['--env',"KIPOI_HOST_DIR={0}".format(_kipoi_dir)])
-    options.extend(['-e',"USER=$USER"])
-    options.extend(['-e',"USERID=$UID"])
+    options.extend(['--env',"KIPOI_HOST_DIR={0}".format(_kipoi_dir+'fi')])
+    #options.extend(['-e',"USER=$USER"])-
+    #options.extend(['-e',"USERID=$UID"])
+    options.extend(['-e',"LOCAL_USER_ID=1001"])
+    uid = os.geteuid()
+    gid = os.getegid()
+    options.extend(['--user','{0}:{1}'.format(uid,gid)])
 
     #options.append('--privileged ')
 
