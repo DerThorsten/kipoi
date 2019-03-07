@@ -144,10 +144,14 @@ def docker_run(user, repo, tag, command, bind_directories=[], gpu=False, dry_run
     for bdir in bind_directories:
         options.append('--mount')
         options.append('type=bind,source={0},target={0}'.format(bdir))
+
+    for special_dir in ["/etc/passwd", "/etc/group", "/etc/shadow"]:
+        options.append('--mount')
+        options.append('type=bind,source={0},target={0},readonly'.format(special_dir))
     
     if gpu:
         options.append("--runtime=nvidia")
-        
+
     options.extend(['--env',"KIPOI_HOST_DIR={0}".format(_kipoi_dir)])
     options.extend(['-e',"USER=$USER"])
     options.extend(['-e',"USERID=$UID"])
@@ -192,7 +196,7 @@ def docker_command(kipoi_cmd, model, dataloader_kwargs, output_files=[], gpu=Fal
     tmp_dir = tempfile.gettempdir()
   
 
-    extra = [home_dir, tmp_dir, _kipoi_dir, "/etc/passwd", "/etc/group", "/etc/shadow"]
+    extra = [home_dir, tmp_dir, _kipoi_dir]
     dirs = unique_list(dirs + extra)
 
     docker_run(user=user, repo=repo, tag=tag,
