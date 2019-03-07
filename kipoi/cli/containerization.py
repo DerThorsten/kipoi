@@ -153,7 +153,7 @@ def docker_run(user, repo, tag, command, bind_directories=[], gpu=False, dry_run
     if gpu:
         options.append("--runtime=nvidia")
 
-    options.extend(['--env',"KIPOI_HOST_DIR={0}".format(_kipoi_dir+'fi')])
+    options.extend(['--env',"KIPOI_HOST_DIR={0}".format(_kipoi_dir)])
     #options.extend(['-e',"USER=$USER"])-
     #options.extend(['-e',"USERID=$UID"])
     options.extend(['-e',"LOCAL_USER_ID=1001"])
