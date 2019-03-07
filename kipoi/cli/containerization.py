@@ -35,6 +35,7 @@ logger.addHandler(logging.NullHandler())
 #     pass
 
 
+
 def singularity_pull(remote_path, local_path):
     """Run `singularity pull`
 
@@ -115,11 +116,23 @@ def singularity_exec(container, command, bind_directories=[], dry_run=False):
         raise ValueError("Command: {} failed".format(" ".join(cmd)))
 
 
-def docker_run(container_name, command, bind_directories=[], gpu=False, dry_run=False):
+
+def docker_pull(user, repo, tag):
+    cmd = ['docker','pull','{0}/{1}:{2}'.format(user, repo, tag)]
+
+    returncode = subprocess.call(cmd)
+    if returncode != 0:
+        raise ValueError("Command: {} failed".format(" ".join(cmd)))
+
+
+
+def docker_run(user, repo, tag, command, bind_directories=[], gpu=False, dry_run=False):
     """Run `docker run`
 
     Args:
-      container: container_name
+      user: dockerhub user name
+      repo: dockerhub repo name
+      tag: dockerhub tag
       command: command to run (as a list)
       bind_directories: Additional directories to bind
       gpu: Use a gpu container
@@ -127,12 +140,14 @@ def docker_run(container_name, command, bind_directories=[], gpu=False, dry_run=
     """
     
     options = []
-
+    container_name = '{0}/{1}:{2}'.format(user, repo, tag)
     for bdir in bind_directories:
         options.append('--mount')
         options.append('type=bind,source={0},target={0}'.format(bdir))
     
-
+    if gpu:
+        options.append("--runtime=nvidia")
+        
     options.extend(['--env',"KIPOI_HOST_DIR={0}".format(_kipoi_dir)])
     options.extend(['-e',"USER=$USER"])
     options.extend(['-e',"USERID=$UID"])
@@ -150,6 +165,41 @@ def docker_run(container_name, command, bind_directories=[], gpu=False, dry_run=
         raise ValueError("Command: {} failed".format(" ".join(cmd)))
 
 
+def docker_command(kipoi_cmd, model, dataloader_kwargs, output_files=[], gpu=False, dry_run=False):
+    assert kipoi_cmd[0] == 'kipoi'
+
+    # pull docker container
+    user = "derthorsten"
+    repo = "kipoi-test"
+    tag = "latest-cpu"
+    if gpu:
+        tag = "latest-gpu"
+
+    docker_pull(user=user, repo=repo, tag=tag)
+
+
+   
+
+    # remove all spaces within each command
+    kipoi_cmd = [x.replace(" ", "").replace("\n", "").replace("\t", "") for x in kipoi_cmd]
+
+    logger.info(dataloader_kwargs)
+    dirs = involved_directories(dataloader_kwargs, output_files, exclude_dirs=[])
+    logger.info(dirs)
+
+    # add home and tmp dir
+    home_dir = os.path.expanduser('~')
+    tmp_dir = tempfile.gettempdir()
+  
+
+    extra = [home_dir, tmp_dir, _kipoi_dir, "/etc/passwd", "/etc/group", "/etc/shadow"]
+    dirs = unique_list(dirs + extra)
+
+    docker_run(user=user, repo=repo, tag=tag,
+               command=kipoi_cmd,
+               bind_directories=dirs, 
+               gpu=gpu,
+               dry_run=dry_run)
 
 # --------------------------------------------
 # Figure out relative paths:
@@ -265,28 +315,3 @@ def singularity_command(kipoi_cmd, model, dataloader_kwargs, output_files=[], so
                      # kipoi_cmd_conda,
                      bind_directories=involved_directories(dataloader_kwargs, output_files, exclude_dirs=['/tmp', '~']), dry_run=dry_run)
 
-def docker_command(kipoi_cmd, model, dataloader_kwargs, output_files=[], dry_run=False):
-
-
-    assert kipoi_cmd[0] == 'kipoi'
-
-    # remove all spaces within each command
-    kipoi_cmd = [x.replace(" ", "").replace("\n", "").replace("\t", "") for x in kipoi_cmd]
-
-    logger.info(dataloader_kwargs)
-    dirs = involved_directories(dataloader_kwargs, output_files, exclude_dirs=[])
-    logger.info(dirs)
-
-    # add home and tmp dir
-    home_dir = os.path.expanduser('~')
-    tmp_dir = tempfile.gettempdir()
-    pw = "/etc/passwd"
-
-
-    extra = [home_dir, tmp_dir, _kipoi_dir, "/etc/passwd", "/etc/group", "/etc/shadow"]
-    dirs = unique_list(dirs + extra)
-
-    docker_run(container_name='kipoi_cpu_docker',
-               command=kipoi_cmd,
-               bind_directories=dirs, 
-               dry_run=dry_run)

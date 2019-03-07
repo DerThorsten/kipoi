@@ -205,8 +205,10 @@ def cli_predict(command, raw_args):
                         "$SINGULARITY_CACHEDIR if set")
     parser.add_argument("--docker", action='store_true',
                         help="Run `kipoi predict` in the appropriate docker container. "
-                        "Containters will get downloaded to ~/.kipoi/envs/ or to "
-                        "$DOCKER_CACHEDIR if set (WARNIGN, THIS IS A WORK IN PROGRESS")
+                        "$DOCKER_CACHEDIR if set (WARNING, THIS IS A WORK IN PROGRESS")
+    parser.add_argument("--docker_gpu", action='store_true',
+                        help="Run `kipoi predict` in the appropriate docker container. "
+                        "(WARNING, THIS IS A WORK IN PROGRESS")
     parser.add_argument('-o', '--output', required=True, nargs="+",
                         help="Output files. File format is inferred from the file path ending. Available file formats are: " +
                         ", ".join(["." + k for k in writers.FILE_SUFFIX_MAP]))
@@ -225,10 +227,10 @@ def cli_predict(command, raw_args):
             sys.exit(1)
         dir_exists(os.path.dirname(o), logger)
 
-    if  args.singularity and  args.docker:
-        parser.error("'--singularity' and '--docker' cannot be used together")
-
-    # singularity_command
+    if  args.singularity and  (args.docker or args.docker_gpu) :
+        parser.error("'--singularity' and '--docker'/ '--docker_gpu' cannot be used together")
+    elif args.docker and args.docker_gpu:
+        parser.error("''--docker' and '--docker_gpu' cannot be used together")
     elif args.singularity:
         from kipoi.cli.singularity import singularity_command
         logger.info("Running kipoi predict in the singularity container")
@@ -241,11 +243,12 @@ def cli_predict(command, raw_args):
                             source=args.source,
                             dry_run=False)
         return None
-    elif args.docker:
+    elif args.docker or args.docker_gpu:
         from kipoi.cli.containerization import docker_command
-        logger.info("Running kipoi predict in a docker container")
-        # Drop the singularity flag
-        raw_args = [x for x in raw_args if x != '--docker']
+        logger.info("Running kipoi predict in a docker container")\
+
+        # Drop the docker flag
+        raw_args = [x for x in raw_args if x != '--docker' and x != '--docker_gpu']
 
         # make absolute path
         working_dir = os.getcwd()
@@ -269,7 +272,7 @@ def cli_predict(command, raw_args):
                             args.model,
                             dataloader_kwargs,
                             output_files=output_file,
-                            #source=args.source,
+                            gpu=bool(args.docker_gpu),
                             dry_run=False)
         return None
     # --------------------------------------------
