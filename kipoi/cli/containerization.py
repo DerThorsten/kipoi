@@ -92,7 +92,7 @@ def singularity_pull(remote_path, local_path):
             raise ValueError("Container doesn't exist at the download path: {}".format(local_path))
 
 
-def singularity_exec(container, command, bind_directories=[], dry_run=False):
+def singularity_exec(container, command, bind_directories=None, dry_run=False):
     """Run `singularity exec`
 
     Args:
@@ -100,6 +100,10 @@ def singularity_exec(container, command, bind_directories=[], dry_run=False):
       command: command to run (as a list)
       bind_directories: Additional directories to bind
     """
+
+    if bind_directories is None:
+        bind_directories = []
+        
     if bind_directories:
         options = ['-B', ",".join(bind_directories)]
     else:
@@ -126,7 +130,7 @@ def docker_pull(user, repo, tag):
 
 
 
-def docker_run(user, repo, tag, command, bind_directories=[], gpu=False, dry_run=False):
+def docker_run(user, repo, tag, command, bind_directories=None, gpu=False, dry_run=False):
     """Run `docker run`
 
     Args:
@@ -138,7 +142,8 @@ def docker_run(user, repo, tag, command, bind_directories=[], gpu=False, dry_run
       gpu: Use a gpu container
       dry_run: do a dry run (? TODO clarify)
     """
-    
+    if bind_directories is None:
+        bind_directories = []
     options = []
     container_name = '{0}/{1}:{2}'.format(user, repo, tag)
     #container_name = 'docker_img'
@@ -174,9 +179,10 @@ def docker_run(user, repo, tag, command, bind_directories=[], gpu=False, dry_run
         raise ValueError("Command: {} failed".format(" ".join(cmd)))
 
 
-def docker_command(kipoi_cmd, model, dataloader_kwargs, output_files=[], gpu=False, dry_run=False):
+def docker_command(kipoi_cmd, model, dataloader_kwargs, output_files=None, gpu=False, dry_run=False):
     assert kipoi_cmd[0] == 'kipoi'
-
+    if output_files is None:
+        output_files = []
     # pull docker container
     user = "derthorsten"
     repo = "kipoi-test"
@@ -301,8 +307,9 @@ source deactivate $env
     return crun_path
 
 
-def singularity_command(kipoi_cmd, model, dataloader_kwargs, output_files=[], source='kipoi', dry_run=False):
-
+def singularity_command(kipoi_cmd, model, dataloader_kwargs, output_files=None, source='kipoi', dry_run=False):
+    if output_files is None:
+        output_files = []
     remote_path = container_remote_url(source)
     local_path = container_local_path(remote_path)
     singularity_pull(remote_path, local_path)
