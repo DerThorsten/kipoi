@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
          git \
          curl \
          bzip2 \
+         ca-certificates\
          zlib1g-dev
     #&&\
     #rm -rf /var/lib/apt/lists/*
