@@ -56,31 +56,36 @@ def cli_test(command, raw_args):
     args = parser.parse_args(raw_args)
     # --------------------------------------------
     mh = kipoi.get_model(args.model, args.source)
-
+    logger.info('A')
     if not mh._sufficient_deps(mh.dependencies):
         # model requirements should be installed
         logger.warning("Required package '{0}' for model type: {1} is not listed in the dependencies".
                     format(mh.MODEL_PACKAGE, mh.type))
 
+    logger.info('B')
     # Load the test files from model source
     mh.pipeline.predict_example(batch_size=args.batch_size, output_file=args.output)
-
+    logger.info('C')
     if (mh.test.expect is not None or args.expect is not None) \
             and not args.skip_expect and args.output is None:
         if args.expect is not None:
+            logger.info('D')
             # `expect` specified from the CLI
             expect = args.expect
         else:
+            logger.info('E')
             # `expect` taken from model.yaml
             if isinstance(mh.test.expect, kipoi.specs.RemoteFile):
+                logger.info('F')
                 # download the file
                 output_dir = kipoi.get_source(args.source).get_model_download_dir(args.model)
+                logger.info('G')
                 makedir_exist_ok(output_dir)
                 mh.test.expect = mh.test.expect.get_file(os.path.join(output_dir, 'test.expect.h5'))
             expect = mh.test.expect
         logger.info('Testing if the predictions match the expected ones in the file: {}'.format(expect))
         logger.info('Desired precision (number of matching decimal places): {}'.format(mh.test.precision_decimal))
-
+        
         # iteratively load the expected file
         expected = kipoi.readers.HDF5Reader(expect)
         expected.open()
