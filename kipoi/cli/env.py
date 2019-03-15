@@ -456,7 +456,7 @@ def cli_create(cmd, raw_args):
 
         # setup the conda env from file
         logger.info("Creating conda env from file: {0}".format(env_file))
-        kipoi_conda.create_env_from_file(env_file, use_stdout=True)
+        kipoi_conda.create_env_from_file(env_file)
         env_db_entry.successful = True
 
         # env is environment name
@@ -481,7 +481,6 @@ def ask_and_delete_envs(to_delete, args):
     del_only_db = False
     if "db" in dir(args) and args.db:
         del_only_db = True
-
     if not del_only_db:
         warn_msg = "Are you sure you want to delete the following environments:\n"
     else:
