@@ -88,26 +88,39 @@ def cli_test(command, raw_args):
         print('Desired precision (number of matching decimal places): {}'.format(mh.test.precision_decimal))
 
         # iteratively load the expected file
+        print('*A')
         expected = kipoi.readers.HDF5Reader(expect)
+        print('*B')
         expected.open()
+        print('*C')
         it = expected.batch_iter(batch_size=args.batch_size)
+        print('*D')
         for i, batch in enumerate(tqdm(it, total=len(expected) // args.batch_size)):
+            print('*E')
             if i == 0 and ('inputs' not in batch or 'preds' not in batch):
+                print('*F')
                 raise ValueError("test.expect file requires 'inputs' and 'preds' "
                                  "to be specified. Available keys: {}".format(list(expected)))
+            print('*G')
             pred_batch = mh.predict_on_batch(batch['inputs'])
+            print('*H')
             # compare to the predictions
             # import ipdb
             # ipdb.set_trace()
             try:
+                print('*I')
                 compare_numpy_dict(pred_batch, batch['preds'], exact=False, decimal=mh.test.precision_decimal)
             except Exception as e:
+                print('error ', str(e))
                 logger.error("Model predictions don't match the expected predictions."
                              "expected: {}\nobserved: {}. Exception: {}".format(batch['preds'], pred_batch, e))
                 expected.close()
                 sys.exit(1)
+        print('*K')
         expected.close()
+        print('*L')
         logger.info('All predictions match')
+    print('*M')
     logger.info('Successfully ran test_predict')
 
 
