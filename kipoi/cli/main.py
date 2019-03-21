@@ -55,6 +55,7 @@ def cli_test(command, raw_args):
                         "or kipoi predict -o file.h5 --keep_inputs. Overrides test.expect in model.yaml")
     args = parser.parse_args(raw_args)
     # --------------------------------------------
+    logger.info('0')
     mh = kipoi.get_model(args.model, args.source)
     logger.info('A')
     if not mh._sufficient_deps(mh.dependencies):
