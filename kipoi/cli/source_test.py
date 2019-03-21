@@ -359,6 +359,8 @@ def cli_test_source(command, raw_args):
                                             len(test_models),
                                             m))
         print('-' * 20)
+        if str(m) not in ['DeepSEA/predict','DeepSEA/variantEffects']:
+            continue
         try:
             if not args.common_env:
                 # Prepend "test-" to the standard kipoi env name

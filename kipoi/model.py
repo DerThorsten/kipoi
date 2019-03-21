@@ -88,19 +88,23 @@ def get_model(model, source="kipoi", with_dataloader=True):
 
     """
     # TODO - model can be a yaml file or a directory
+    logger.info("AA")
     if isinstance(source, str):
         source_name = source
         source = kipoi.config.get_source(source)
     else:
         source_name = 'obj'
         source = source
-
+    logger.info("BB")
     # pull the model
     source.pull_model(model)
+    logger.info("CC")
     # get the model directory
     source_dir = source.get_model_dir(model)
+    logger.info("DD")
     # get model description
     md = source.get_model_descr(model)
+    logger.info("EE")
 
     # TODO - is there a way to prevent code duplication here?
     # TODO - possible to inherit from both classes and call the corresponding inits?
@@ -111,8 +115,10 @@ def get_model(model, source="kipoi", with_dataloader=True):
 
     # Load the dataloader
     if with_dataloader:
+        logger.info("DL_AA")
         # load from python
         if isinstance(md.default_dataloader, DataLoaderImport):
+            logger.info("DL_BB")
             with cd(source_dir):
                 default_dataloader = md.default_dataloader.get()
             default_dataloader.source_dir = source_dir
@@ -122,6 +128,7 @@ def get_model(model, source="kipoi", with_dataloader=True):
                 # override default arguments specified under default
                 default_dataloader = override_default_kwargs(default_dataloader, override)
         else:
+            logger.info("DL_CC")
             # load from directory
             # attach the default dataloader already to the model
             if ":" in md.default_dataloader:
@@ -140,7 +147,7 @@ def get_model(model, source="kipoi", with_dataloader=True):
     model_download_dir = source.get_model_download_dir(model)
     # Read the Model - append methods, attributes to self
     with cd(source_dir):  # move to the model directory temporarily
-
+        logger.info("SD_AA")
         # explicitly handle downloading files for TensorFlowModel
         if md.type == 'tensorflow' or md.defined_as == 'kipoi.model.TensorFlowModel':
             output_dir = os.path.join(model_download_dir, "ckp")
@@ -148,6 +155,7 @@ def get_model(model, source="kipoi", with_dataloader=True):
 
         # download url links if specified under args
         for k in md.args:
+            logger.info("SD_BB")
             if isinstance(md.args[k], RemoteFile):
                 output_dir = os.path.join(model_download_dir, k)
                 logger.info("Downloading model arguments {} from {}".format(k, md.args[k].url))
@@ -162,6 +170,7 @@ def get_model(model, source="kipoi", with_dataloader=True):
                 path = md.args[k].get_file(os.path.join(output_dir, fname))
                 md.args[k] = path
         if md.type is not None:
+            logger.info("SD_DD")
             # old API
             if md.type == 'custom':
                 Mod = load_model_custom(**md.args)
@@ -178,6 +187,7 @@ def get_model(model, source="kipoi", with_dataloader=True):
                                  format(md.type,
                                         ['custom'] + list(AVAILABLE_MODELS.keys())))
         else:
+            logger.info("SD_EE")
             # new API
             try:
                 Mod = load_obj(md.defined_as)
@@ -198,6 +208,7 @@ def get_model(model, source="kipoi", with_dataloader=True):
             if md.type is None:
                 md.type = 'custom'
 
+    logger.info("SD_FF")
     # populate the returned class
     mod.type = md.type
     mod.args = md.args
